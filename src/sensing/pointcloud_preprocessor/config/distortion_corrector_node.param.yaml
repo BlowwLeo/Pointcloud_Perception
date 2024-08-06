@@ -1,0 +1,5 @@
+/**:
+  ros__parameters:
+    base_frame: velodyne
+    use_imu: true
+    use_3d_distortion_correction: false

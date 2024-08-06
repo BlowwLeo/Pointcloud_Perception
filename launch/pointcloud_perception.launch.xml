@@ -1,0 +1,95 @@
+<launch>
+    <!-- tf_transformer -->
+    <arg name="input_frame" default="velodyne"/>
+    <arg name="output_frame" default="base_link"/>
+
+    <!-- Input pointcloud topic name list as a string_array.
+    To subscribe multiple topics, write as:
+    "['/points_raw0', '/points_raw1', '/points_raw2', ...]"-->
+    <arg name="pointcloud_topics" default="['/velodyne_points','/est']"/>
+    
+    <!-- distortion_corrector -->
+    <arg name="input/twist" default="/sensing/vehicle_velocity_converter/twist_with_covariance"/>
+    <arg name="input/imu" default="/imu/data"/>
+    <arg name="param_file" default="$(find-pkg-share pointcloud_preprocessor)/config/distortion_corrector_node.param.yaml"/>
+
+    <!-- cropbox_filter -->
+    <arg name="crop_coord" default="[-50.0,50.0,-100.0,200.0,-2.0,3.0]" description=""/>  
+
+    <!-- approximate_downsample_filter -->
+    <arg name="launch_downsample_filter_node" default='true' />
+    <arg name="voxel_size_x" default="0.3"/>
+    <arg name="voxel_size_y" default="0.3"/>
+    <arg name="voxel_size_z" default="0.1"/>
+
+    <!-- lidar_centerpoint -->
+    <arg name="data_path" default="$(find-pkg-share lidar_centerpoint)/../../../../data" description="packages data and artifacts directory path"/>
+    <arg name="model_name" default="centerpoint" description="options: `centerpoint` or `centerpoint_tiny`"/>
+    <arg name="model_path" default="$(var data_path)/lidar_centerpoint"/>
+    <arg name="model_param_path" default="$(find-pkg-share lidar_centerpoint)/config/$(var model_name).param.yaml"/>
+    <arg name="ml_package_param_path" default="$(var model_path)/$(var model_name)_ml_package.param.yaml"/>
+    <arg name="class_remapper_param_path" default="$(var model_path)/detection_class_remapper.param.yaml"/>
+  
+    <!-- ground_segmentation -->
+    <arg name="ground_segmentation_param_file" default="$(find-pkg-share ground_segmentation)/config/ray_ground_filter.param.yaml"/>
+    
+    <!-- obstacle_validator -->
+    <arg name="obstacle_pointcloud_based_validator_param_path" default="$(find-pkg-share detected_object_validation)/config/obstacle_pointcloud_based_validator.param.yaml"/>
+
+    <!-- Apollo -->
+    <arg name="data_path" default="$(find-pkg-share lidar_apollo_instance_segmentation)/../../../../data" description="packages data and artifacts directory path"/>
+    <arg name="trained_onnx_file" default="$(var data_path)/lidar_apollo_instance_segmentation/vls-128.onnx"/>
+    <arg name="param_file_apollo" default="$(find-pkg-share lidar_apollo_instance_segmentation)/config/vls-128.param.yaml"/>
+
+    <!-- shape_estimation -->
+    <arg name="param_file_shape_estimation" default="$(find-pkg-share shape_estimation)/config/shape_estimation.param.yaml"/>
+
+    <!-- detection_by_tracker -->
+    <arg name="param_file_detection_by_tracker" default="$(find-pkg-share detection_by_tracker)/config/detection_by_tracker.param.yaml"/>
+
+    <!-- object_merger -->
+    <arg name="data_association_matrix_path" default="$(find-pkg-share object_merger)/config/data_association_matrix.param.yaml"/>
+    <arg name="distance_threshold_list_path" default="$(find-pkg-share object_merger)/config/overlapped_judge.param.yaml"/>
+    <arg name="param_file_object_merger" default="$(find-pkg-share object_merger)/config/object_association_merger.param.yaml"/>
+
+    <!-- object_tracker -->
+    <arg name="config_path_object_tracker" default="$(find-pkg-share multi_object_tracker)/config/"/>
+    
+    <node
+        pkg="tf2_ros"
+        exec="static_transform_publisher"
+        name="static_transform_publisher"
+        output="screen"
+        args="0 0 0 0 0 0 $(var input_frame) $(var output_frame)">
+    </node>
+
+    <include file="launch/pointcloud_perception.launch.py">
+        <arg name="pointcloud_topics" value="$(var pointcloud_topics)"/>
+        <arg name="input/twist" value="$(var input/twist)"/>
+        <arg name="input/imu" value="$(var input/imu)"/>
+        <arg name="param_file_distortion_corrector" value="$(var param_file)"/>
+        <arg name="crop_coord" value="$(var crop_coord)"/>
+        <arg name="voxel_size_x" value="$(var voxel_size_x)"/>        
+        <arg name="voxel_size_y" value="$(var voxel_size_y)"/>
+        <arg name="voxel_size_z" value="$(var voxel_size_z)"/>
+        <arg name="launch_downsample_node" value="$(var launch_downsample_filter_node)"/>
+        <arg name="model_param_path" value="$(var model_param_path)"/>
+        <arg name="ml_package_param_path" value= "$(var ml_package_param_path)"/>
+        <arg name="class_remapper_param_path" value ="$(var class_remapper_param_path)"/>
+        <arg name="model_path" value="$(var model_path)"/>
+        <arg name="param_file_ground_segmentation" value= "$(var ground_segmentation_param_file)"/>
+        <arg name="param_file_obstacle_validator" value= "$(var obstacle_pointcloud_based_validator_param_path)"/>
+        <arg name="param_file_apollo" value="$(var param_file_apollo)"/>
+        <arg name="onnx_file_apollo" value="$(var trained_onnx_file)"/>
+        <arg name="param_file_shape_estimation" value="$(var param_file_shape_estimation)"/>
+        <arg name="param_file_detection_by_tracker" value="$(var param_file_detection_by_tracker)"/>
+        <arg name="data_association_matrix_path" value="$(var data_association_matrix_path)"/>
+        <arg name="distance_threshold_list_path" value="$(var distance_threshold_list_path)"/>
+        <arg name="param_file_object_merger" value="$(var param_file_object_merger)"/>
+        <arg name="config_path_object_tracker" value="$(var config_path_object_tracker)"/>
+
+    </include>
+
+    
+
+</launch>

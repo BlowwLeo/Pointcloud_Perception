@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- -->
+    <arg name="input/pointcloud" default="/downsample_filter/pointcloud"/>
+
+
+    <!-- lidar_centerpoint -->
+    <arg name="output/centerpoint_objects" default="/centerpoint_detected_objects"/>
+    
+    <!-- obstacle_pointcloud_based_validator -->
+    <arg name="output/obstacle_validator_objects" default="/centerpoint_valided_objects"/>
+
+    <!-- lidar_apollo_instance_segmentation -->
+    <arg name="output/apollo_clusters" default="labeled_clusters"/>
+
+    <!-- detection_by_tracker -->
+    <arg name="output/tracker_detected_objects" default="/tracker_detected_objects"/>
+
+    <!-- multi_object_tracker -->
+    <arg name="input_channels" default="['detected_objects']"/>
+    <arg name="output/object_tracker" default="tracked_objects"/>
+
+    <!-- object_merger -->
+    <arg name="output/merged_objects" default="detection/valid_detected_objects"/>
+    
+    <!-- shape_estimation -->
+    <arg name="output/shape_estimation_objects" default="shape_estimated_objects"/>
+
+    <include file="$(find-pkg-share lidar_centerpoint)/launch/lidar_centerpoint.launch.xml">
+        <arg name="input/pointcloud" value="$(var input/pointcloud)"/>
+        <arg name="output/objects" value="$(var output/centerpoint_objects)"/>
+    </include>
+    
+    <include file="$(find-pkg-share detected_object_validation)/launch/obstacle_pointcloud_based_validator.launch.xml">
+        <arg name="input/detected_objects" value="$(var output/centerpoint_objects)"/>
+        <arg name="input/obstacle_pointcloud" value="$(var input/pointcloud)"/>
+        <arg name="output/objects" value="$(var output/obstacle_validator_objects)"/>
+    </include>
+
+    <include file="$(find-pkg-share lidar_apollo_instance_segmentation)/launch/lidar_apollo_instance_segmentation.launch.xml">
+        <arg name="input/pointcloud" value="/downsample_filter/pointcloud"/>
+        <arg name="output/objects" value="$(var output/apollo_clusters)"/>
+    </include>
+
+    <include file="$(find-pkg-share detection_by_tracker)/launch/detection_by_tracker.launch.xml">
+        <arg name="input/tracked_objects" value="$(var output/object_tracker)"/>
+        <arg name="input/initial_objects" value="$(var output/shape_estimation_objects)"/>
+        <arg name="output/objects" value="$(var output/tracker_detected_objects)"/>
+    </include>
+    
+    <include file="$(find-pkg-share multi_object_tracker)/launch/multi_object_tracker.launch.xml">
+        <arg name="selected_input_channels" value="$(var input_channels)"/>
+        <arg name="output" value="$(var output/object_tracker)"/>
+    </include>
+
+    <include file="$(find-pkg-share object_merger)/launch/object_association_merger.launch.xml">
+        <arg name="input/object0" value="$(var output/obstacle_validator_objects)"/>
+        <arg name="input/object1" value="$(var output/tracker_detected_objects)"/>
+        <arg name="output/object" value="$(var output/merged_objects)"/>
+    </include>
+
+    <include file="$(find-pkg-share shape_estimation)/launch/shape_estimation.launch.xml">
+        <arg name="input/objects" value="$(var output/apollo_clusters)"/>
+        <arg name="output/objects" value="$(var output/shape_estimation_objects)"/>
+    </include>
+
+</launch>

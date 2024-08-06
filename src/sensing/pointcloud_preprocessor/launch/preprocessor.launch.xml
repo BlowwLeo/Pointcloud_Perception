@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Input pointcloud topic_name list as a string_array.
+     To subscribe multiple topics, write as:
+     "['/points_raw0', '/points_raw1', '/points_raw2', ...]"
+     This syntax is also available from command line 
+     -->
+  <arg name="input_points_raw_list" default="['/sensing/lidar/top/rectified/pointcloud']" description="define as string_array"/>
+
+  <arg name="output_points_raw" default="/points_raw/cropbox/filtered" description=""/>
+  
+  <arg name="tf_output_frame" default="velodyne_top" description=""/>
+  
+  <!-- Coordonates of the cropbox (points outside are skipped), write as:
+  	"[min_x,max_x,min_y,max_y,min_z,max_z]"
+     -->
+  
+  <arg name="crop_coord" default="[-200.0,300.0,-50.0,50.0,-2.0,3.0]" description=""/>
+
+  <include file="$(find-pkg-share pointcloud_preprocessor)/launch/preprocessor.launch.py">
+    <arg name="input_points_raw_list" value="$(var input_points_raw_list)"/>
+    <arg name="output_points_raw" value="$(var output_points_raw)"/>
+    <arg name="tf_output_frame" value="$(var tf_output_frame)"/>
+    <arg name="crop_coord" value="$(var crop_coord)"/>
+  </include>
+</launch>

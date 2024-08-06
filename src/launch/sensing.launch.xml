@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- preprocessor -->
+    <!-- Input pointcloud topic_name list as a string_array.
+    To subscribe multiple topics, write as:
+    "['/points_raw0', '/points_raw1', '/points_raw2', ...]"
+    This syntax is also available from command line -->
+    <arg name="input/raw_pointcloud" default="['/velodyne_points']"/>
+    <arg name="output/preprocessor_pointcloud" default="/pointcloud_concatened"/>
+    <arg name="tf_output_frame" default="velodyne"/>
+    <!-- Coordonates of the cropbox (points outside are skipped), write as:
+  	"[min_x,max_x,min_y,max_y,min_z,max_z]" -->
+    <arg name="crop_coord" default="[-50.0,50.0,-200.0,300.0,-2.0,3.0]" description=""/>
+    
+    <!-- approximate_downsample_filter -->
+    <arg name="launch_my_node" default="true" />
+    <arg name="input_topic_name" default="/velodyne_points"/>
+    <arg name="output_topic_name" default="/downsample_filter/pointcloud"/>
+
+    <arg name="voxel_size_x" default="0.1"/>
+    <arg name="voxel_size_y" default="0.1"/>
+    <arg name="voxel_size_z" default="0.1"/>
+    <arg name="input_frame" default="velodyne"/>
+    <arg name="output_frame" default="base_link"/>
+    
+    
+    <node if="$(var launch_my_node)" pkg="pointcloud_preprocessor" exec="approximate_downsample_filter_node" name="voxel_grid_downsample_filter">
+        <remap from="input" to="$(var input_topic_name)"/>
+        <remap from="output" to="$(var output_topic_name)"/>
+
+        <param name="voxel_size_x" value="$(var voxel_size_x)"/>        
+        <param name="voxel_size_y" value="$(var voxel_size_y)"/>
+        <param name="voxel_size_z" value="$(var voxel_size_z)"/>
+        <param name="input_frame" value="$(var input_frame)"/>
+        <param name="output_frame" value="$(var output_frame)"/>
+    </node>
+
+
+
+</launch>

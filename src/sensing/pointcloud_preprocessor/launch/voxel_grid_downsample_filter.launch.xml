@@ -1,0 +1,21 @@
+<launch>
+  <arg name="input_topic_name" default="/velodyne_points"/>
+  <arg name="output_topic_name" default="/downsample_filter/pointcloud"/>
+
+  <arg name="voxel_size_x" default="0.2"/>
+  <arg name="voxel_size_y" default="0.2"/>
+  <arg name="voxel_size_z" default="0.1"/>
+  <arg name="input_frame" default="velodyne"/>
+  <arg name="output_frame" default="velodyne"/>
+
+  <node pkg="pointcloud_preprocessor" exec="approximate_downsample_filter_node" name="voxel_grid_downsample_filter">
+    <remap from="input" to="$(var input_topic_name)"/>
+    <remap from="output" to="$(var output_topic_name)"/>
+
+    <param name="voxel_size_x" value="$(var voxel_size_x)"/>
+    <param name="voxel_size_y" value="$(var voxel_size_y)"/>
+    <param name="voxel_size_z" value="$(var voxel_size_z)"/>
+    <param name="input_frame" value="$(var input_frame)"/>
+    <param name="output_frame" value="$(var output_frame)"/>
+  </node>
+</launch>
