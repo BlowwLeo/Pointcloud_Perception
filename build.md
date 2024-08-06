@@ -4,7 +4,7 @@
 ### Build
 To build Pointcloud_Perception:
 ```
-$ colcon build --parallel-workers 1`
+$ colcon build --parallel-workers 1
 ```
 It's possible to just run `colcon build` but may make the system run out of memory.
 
