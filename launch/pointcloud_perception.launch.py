@@ -53,34 +53,35 @@ def launch_setup(context, *args, **kwargs):
 
     nodes = []
     input_concatenate_node = []
-
+    i=0
     #Launch distrotion_corerctor and outlier_filer for each topic in input
     for topic in topics_list:
         nodes.append(ComposableNode(
             package='pointcloud_preprocessor',
             plugin='pointcloud_preprocessor::DistortionCorrectorComponent',
-            name='distortion_corrector_{}'.format(topic.strip('/').replace('/', '_')),
+            name='distortion_corrector_'+str(i),
             remappings=[
                 ('~/input/pointcloud', topic),
                 ('~/input/twist', input_twist),
                 ('~/input/imu', input_imu),
-                ('~/output/pointcloud', '/rectified_{}'.format(topic.strip('/')))
+                ('~/output/pointcloud', '/rectified_'+str(i))
             ],
             parameters=[param_file_distortion_corrector]
         ))
 
         nodes.append(ComposableNode(
             package='pointcloud_preprocessor',
-            plugin='pointcloud_preprocessor::VoxelGridDownsampleFilterComponent',
-            name='voxel_outlier_filter_{}'.format(topic.strip('/')),
+            plugin='pointcloud_preprocessor::RingOutlierFilterComponent',
+            name='ring_outlier_filter_'+str(i),
             remappings=[
-                ('input', '/rectified_{}'.format(topic.strip('/'))),
-                ('output', '/filtered_{}'.format(topic.strip('/')))
+                ('~/input/points', '/rectified_'+str(i)),
+                ('~/output/points', '/filtered_'+str(i))
             ]
         ))
-        input_cropbox_filter='/filtered_{}'.format(topic.strip('/'))
+        input_cropbox_filter='/filtered_'+str(i)
         if len(topics_list) > 1:
-            input_concatenate_node.append('/filtered_{}'.format(topic.strip('/')))
+            input_concatenate_node.append('/filtered_'+str(i))
+        i+=1
 
     #Launch concatenate_pointcloud
     if len(topics_list) > 1:
