@@ -94,7 +94,7 @@ An TrackedObject is:
 |`voxel_size_z`|double|`0.1`|voxel size z [m] (downsample node)|
 |`crop_coord`|array of int|`[-50.0,50.0,-100.0,200.0,-2.0,3.0]`|Coordinate of the polygon where points outside are ignored [x_min,x_max,y_min,y_max,z_min,z_max]|
 
-Parameters can be set in the command line, e.g `'input_frame':='livox_frame'`.
+Parameters can be set in the command line, e.g `'input_frame':='base_frame'`.
 
 
 ## Measuring the performance
